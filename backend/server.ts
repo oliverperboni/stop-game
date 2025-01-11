@@ -121,14 +121,16 @@ io.on("connection", (socket) => {
         roomFound = true;
         room.letter = generateGameLetter();
         room.isStop = !room.isStop;
+        io.to(gameId).emit("started",room.letter,gameId)
         console.log(`Room ${gameId} updated:`, room);
+
       }
     });
 
     if (!roomFound) {
       console.log(`Room ${gameId} not found`);
     }
-    io.to(gameId).on()
+   
   });
 
   socket.on("on-stop", (gameId: string) => {
@@ -147,7 +149,14 @@ io.on("connection", (socket) => {
     if (!roomFound) {
       console.log(`Room ${gameId} not found`);
     }
+    io.to(gameId).emit("stoped",gameId)
   });
+
+  socket.on("game-finish",(gameId)=>{
+
+    io.to(gameId).emit("game-finish",calcResult(gameId))
+
+  })
 
   socket.on("disconnect", () => {
     console.log(`Socket disconnected: ${socket.id}`);
