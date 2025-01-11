@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stop Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+        #gameSection table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #gameSection th, #gameSection td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        #currentLetter {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div id="createRoom" class="section">
+        <h2>Create New Room</h2>
+        <div>
+            <input type="text" id="category" placeholder="Add category">
+            <button onclick="addCategory()">Add Category</button>
+        </div>
+        <div>
+            <p>Categories: <span id="categoryList"></span></p>
+            <button onclick="createRoom()">Create Room</button>
+        </div>
+    </div>
+
+    <div id="joinRoom" class="section hidden">
+        <h2>Join Room</h2>
+        <p>Room ID: <span id="roomId"></span></p>
+        <input type="text" id="playerName" placeholder="Your name">
+        <button onclick="joinRoom()">Join Game</button>
+    </div>
+
+    <div id="gameSection" class="section hidden">
+        <h2>Game</h2>
+        <p>Current Letter: <span id="currentLetter">-</span></p>
+        <p>Players: <span id="playersList"></span></p>
+        <button id="startButton" onclick="startGame()">Start Game</button>
+        <button id="stopButton" onclick="stopGame()" class="hidden">Stop!</button>
+        <table id="gameTable"></table>
+        <button id="submitButton" onclick="submitAnswers()" class="hidden">Submit Answers</button>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:3000');
+        const categories = [];
+        let currentRoomId = '';
+        let currentPlayer = '';
+        let isGameStarted = false;
+
+        function addCategory() {
+            const category = document.getElementById('category').value.trim();
+            if (category) {
+                categories.push(category);
+                document.getElementById('categoryList').textContent = categories.join(', ');
+                document.getElementById('category').value = '';
+            }
+        }
+
+        async function createRoom() {
+            if (categories.length === 0) {
+                alert('Add at least one category');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/create-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ categories })
+                });
+
+                const data = await response.json();
+                currentRoomId = data.roomId;
+                document.getElementById('roomId').textContent = currentRoomId;
+                document.getElementById('createRoom').classList.add('hidden');
+                document.getElementById('joinRoom').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error creating room:', error);
+            }
+        }
+
+        function joinRoom() {
+            const playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) {
+                alert('Please enter your name');
+                return;
+            }
+
+            currentPlayer = playerName;
+            socket.emit('join-room', {
+                roomId: currentRoomId,
+                playerName: playerName
+            });
+
+            document.getElementById('joinRoom').classList.add('hidden');
+            document.getElementById('gameSection').classList.remove('hidden');
+            createGameTable();
+        }
+
+        function createGameTable() {
+            const table = document.getElementById('gameTable');
+            table.innerHTML = '';
+
+            // Create header row
+            const headerRow = document.createElement('tr');
+            categories.forEach(category => {
+                const th = document.createElement('th');
+                th.textContent = category;
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+
+            // Create input row
+            const inputRow = document.createElement('tr');
+            categories.forEach((_, index) => {
+                const td = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `answer_${index}`;
+                input.disabled = true;
+                td.appendChild(input);
+                inputRow.appendChild(td);
+            });
+            table.appendChild(inputRow);
+        }
+
+        function startGame() {
+            socket.emit('play', currentRoomId);
+            document.getElementById('startButton').classList.add('hidden');
+            document.getElementById('stopButton').classList.remove('hidden');
+            document.getElementById('submitButton').classList.remove('hidden');
+            enableInputs(true);
+        }
+
+        function stopGame() {
+            socket.emit('on-stop', currentRoomId);
+            document.getElementById('stopButton').classList.add('hidden');
+            enableInputs(false);
+        }
+
+        function enableInputs(enabled) {
+            categories.forEach((_, index) => {
+                document.getElementById(`answer_${index}`).disabled = !enabled;
+            });
+        }
+
+        function submitAnswers() {
+            const answers = categories.map((_, index) => 
+                document.getElementById(`answer_${index}`).value.trim()
+            );
+
+            socket.emit('submit-awnser', {
+                gameId: currentRoomId,
+                player: currentPlayer,
+                awnsers: answers
+            });
+
+            document.getElementById('submitButton').disabled = true;
+        }
+
+        // Socket event listeners
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+
+        // You might want to add more socket listeners for game updates
+        // For example, listening for when other players join, game status updates, etc.
+    </script>
+</body>
+</html>
