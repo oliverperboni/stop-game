@@ -35,10 +35,6 @@ type gameRoom = {
   isStop: boolean;
 };
 
-type CreateRoomRequest = {
-  categories: string[];
-};
-
 const StopGame: gameRoom[] = [];
 
 app.post("/create-room", (req: any, res: any) => {
@@ -70,11 +66,17 @@ app.post("/create-room", (req: any, res: any) => {
   });
 });
 
+app.get("/", (_, res: any) => {
+  return res.status(200).json({ message: "hello to stop game" })
+})
+
 io.on("connection", (socket) => {
   console.log("New socket connection:", socket.id);
 
   socket.on("join-room", (req: joinRoom) => {
-    console.log(`Player ${req.playerName} attempting to join room ${req.roomId}`);
+    console.log(
+      `Player ${req.playerName} attempting to join room ${req.roomId}`
+    );
 
     let roomFound = false;
 
@@ -94,7 +96,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("submit-awnser", (answers: submitForm) => {
-    console.log(`Player ${answers.player} submitted answers for game ${answers.gameId}:`, answers.awnsers);
+    console.log(
+      `Player ${answers.player} submitted answers for game ${answers.gameId}:`,
+      answers.awnsers
+    );
 
     let roomFound = false;
 
@@ -102,7 +107,9 @@ io.on("connection", (socket) => {
       if (room.id === answers.gameId) {
         roomFound = true;
         room.playersWithAnswers.set(answers.player, answers.awnsers);
-        console.log(`Answers updated for player ${answers.player} in room ${answers.gameId}`);
+        console.log(
+          `Answers updated for player ${answers.player} in room ${answers.gameId}`
+        );
       }
     });
 
@@ -121,16 +128,14 @@ io.on("connection", (socket) => {
         roomFound = true;
         room.letter = generateGameLetter();
         room.isStop = !room.isStop;
-        io.to(gameId).emit("started",room.letter,gameId)
+        io.to(gameId).emit("started", room.letter, gameId);
         console.log(`Room ${gameId} updated:`, room);
-
       }
     });
 
     if (!roomFound) {
       console.log(`Room ${gameId} not found`);
     }
-   
   });
 
   socket.on("on-stop", (gameId: string) => {
@@ -149,14 +154,15 @@ io.on("connection", (socket) => {
     if (!roomFound) {
       console.log(`Room ${gameId} not found`);
     }
-    io.to(gameId).emit("stoped",gameId)
+
+    console.log(`Room ${gameId} stopped and emit the stop`);
+    io.to(gameId).emit("stoped", gameId, calcResult(gameId));
   });
 
-  socket.on("game-finish",(gameId)=>{
-
-    io.to(gameId).emit("game-finish",calcResult(gameId))
-
-  })
+  socket.on("game-finish", (gameId) => {
+    console.log(`Room ${gameId} ended the game`);
+    io.to(gameId).emit("game-finish", calcResult(gameId));
+  });
 
   socket.on("disconnect", () => {
     console.log(`Socket disconnected: ${socket.id}`);
@@ -165,8 +171,26 @@ io.on("connection", (socket) => {
 
 const generateGameLetter = (): string => {
   const letters = [
-    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "L",
-    "M", "N", "O", "P", "R", "S", "T", "U", "V",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
   ];
 
   const randomIndex = Math.floor(Math.random() * letters.length);
@@ -222,6 +246,6 @@ const calcResult = (gameId: string): Map<string, number> => {
 };
 
 const PORT = 3000;
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
