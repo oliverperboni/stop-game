@@ -7,10 +7,17 @@
   }
 
   async function createRoom() {
-    const request = await fetch(baseUrl + "/create-room", {
+    await fetch(baseUrl + "/create-room", {
       method: "Post",
-      body: JSON.stringify(catg),
-    });
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ categories: inputText }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      });
   }
 </script>
 
