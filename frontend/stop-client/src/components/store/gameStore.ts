@@ -6,6 +6,7 @@ export interface Player {
   }
   
   export interface GameState {
+    roomId: string
     players: Player[];
     currentRound: number;
     categories: string[];
@@ -14,6 +15,7 @@ export interface Player {
   }
 
   const initialState : GameState ={
+    roomId:'',
     players: [],
     currentRound: 0,
     categories: [],

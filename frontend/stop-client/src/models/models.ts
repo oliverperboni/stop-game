@@ -16,3 +16,14 @@ export type gameRoom = {
   playersWithAnswers: Map<string, string[]>;
   isStop: boolean;
 };
+
+export interface JoinRoom {
+  playerName: string;
+  roomId: string;
+}
+
+export interface SubmitForm {
+  player: string;
+  gameId: string;
+  answers: string[];
+}

@@ -1,15 +1,6 @@
 import { io, Socket } from "socket.io-client";
+import type { JoinRoom, SubmitForm } from "../models/models";
 
-interface JoinRoom {
-  playerName: string;
-  roomId: string;
-}
-
-interface SubmitForm {
-  player: string;
-  gameId: string;
-  answers: string[];
-}
 
 class SocketService {
   private socket: Socket;

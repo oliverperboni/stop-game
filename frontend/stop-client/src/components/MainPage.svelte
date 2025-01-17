@@ -1,8 +1,14 @@
 <script lang="ts">
+  import socketService from "../service/socketService";
+  import type { JoinRoom, SubmitForm } from "../models/models";
+  import { gameState } from "./store/gameStore";
+  let store = gameState
   const baseUrl = "http://localhost:3000";
   let inputText: string[] = $state([]);
+  const ws = socketService;
   let catg = $state("");
-  let roomId = $state("")
+  let roomId = $state("");
+  let player = $state("");
   function addCategory() {
     inputText.push(catg);
     catg = "";
@@ -21,6 +27,17 @@
         console.log(data);
       });
   }
+
+  function joinGame() {
+    const join : JoinRoom ={
+      playerName: player,
+      roomId: roomId
+    }
+    ws.joinRoom(join, (cols) => {
+      store.update(current => ({ ...current,roomId: join.roomId, players: [...current.players, {name: join.playerName, score: 0}]}))
+    });
+
+  }
 </script>
 
 {#each inputText as item}
@@ -32,5 +49,6 @@
 <button onclick={addCategory}>Add Category</button>
 <button onclick={createRoom}>Create a Game</button>
 
-<input type="text" bind:value={roomId} >
-<button onclick={createRoom}>Join room</button>
+<input type="text" bind:value={roomId} />
+<input type="text" bind:value={player} />
+<button onclick={joinGame}>Join room</button>
