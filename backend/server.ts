@@ -84,6 +84,7 @@ io.on("connection", (socket) => {
       if (room.id === req.roomId) {
         roomFound = true;
         room.playersWithAnswers.set(req.playerName, []);
+        socket.emit("joined-game",room.columns)
         console.log(`Player ${req.playerName} joined room ${req.roomId}`);
       }
     });
@@ -91,6 +92,7 @@ io.on("connection", (socket) => {
     if (!roomFound) {
       console.log(`Room ${req.roomId} not found`);
     }
+   
 
     socket.join(req.roomId);
   });
