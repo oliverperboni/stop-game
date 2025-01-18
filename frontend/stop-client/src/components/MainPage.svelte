@@ -5,11 +5,12 @@
   let store = gameState;
   const baseUrl = "http://localhost:3000";
   let inputCategories: string[] = $state([]);
-  let inputAnswers = inputCategories.map(()=> "")
+  let inputAnswers = inputCategories.map(() => "");
   const ws = socketService;
   let catg = $state("");
   let roomId = $state("");
   let player = $state("");
+  
 
 
   function addCategory() {
@@ -45,23 +46,30 @@
       }));
     });
   }
-
-  function startGame(){
-    ws.play(roomId)
-    store.update((curr)=> ({
+  ws.on("started", (letter, gameId) => {
+    store.update((curr) => ({
       ...curr,
-      gameStatus:'in-progress',
-    }))
+      gameStatus: "in-progress",
+    }));
+    console.log("Game started with letter:", letter);
+    console.log("Game ID:", gameId);
+});
+
+  function startGame() {
+    ws.play(roomId);
+   
   }
 
   function logInputs() {
-    const formToSubmit : SubmitForm ={
+    const formToSubmit: SubmitForm = {
       answers: inputAnswers,
-      gameId:roomId,
-      player: player
-    }
-    console.log(`dei submite das respostars ${formToSubmit.answers} - ${formToSubmit.gameId} - ${formToSubmit.player}`)
-    ws.submitAnswer(formToSubmit)
+      gameId: roomId,
+      player: player,
+    };
+    console.log(
+      `dei submite das respostars ${formToSubmit.answers} - ${formToSubmit.gameId} - ${formToSubmit.player}`
+    );
+    ws.submitAnswer(formToSubmit);
   }
 </script>
 
@@ -81,14 +89,16 @@
 <input type="text" bind:value={player} />
 <button onclick={joinGame}>Join room</button>
 
-
 <button onclick={startGame}>Start Game</button>
-{#if $store.gameStatus === 'in-progress'}
-
+{#if $store.gameStatus === "in-progress"}
   {#each $store.categories as category, index}
     <p>{category}</p>
-    <input type="text" bind:value={inputAnswers[index]} placeholder={`Input ${category}`} />
+
+    <input
+      type="text"
+      bind:value={inputAnswers[index]}
+      placeholder={`Input ${category}`}
+    />
   {/each}
   <button onclick={logInputs}>Submit</button>
 {/if}
-
