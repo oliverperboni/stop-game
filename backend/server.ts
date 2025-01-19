@@ -167,10 +167,10 @@ io.on("connection", (socket) => {
         room.playersWithAnswers.set(req.playerName, []);
         socket.emit("joined-game", room.columns);
         console.log(`Player ${req.playerName} joined room ${req.roomId}`);
-        console.log(room)
+        console.log(room);
       }
     });
-    console.log(StopGame)
+    console.log(StopGame);
 
     if (!roomFound) {
       console.log(`Room ${req.roomId} not found`);
@@ -184,9 +184,9 @@ io.on("connection", (socket) => {
       `Player ${answers.player} submitted answers for game ${answers.gameId}:`,
       answers.answers
     );
-
+  
     let roomFound = false;
-
+  
     StopGame.map((room) => {
       if (room.id === answers.gameId) {
         roomFound = true;
@@ -194,13 +194,18 @@ io.on("connection", (socket) => {
         console.log(
           `Answers updated for player ${answers.player} in room ${answers.gameId}`
         );
+        room.isStop = true; // Marca que o round foi encerrado
       }
     });
+  
 
+    io.to(answers.gameId).emit("end-round", answers.gameId);
+  
     if (!roomFound) {
       console.log(`Room ${answers.gameId} not found`);
     }
   });
+  
 
   socket.on("play", (gameId: string) => {
     console.log(`Game play triggered for room ${gameId}`);

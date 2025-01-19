@@ -6,21 +6,23 @@ export interface Player {
   }
   
   export interface GameState {
-    roomId: string
+    roomId: string;
+    letter: string;
     players: Player[];
     currentRound: number;
     categories: string[];
-    answers: Record<string, string>; // Map of player names to their answers
     gameStatus: 'waiting' | 'in-progress' | 'finished';
+    isStop: boolean
   }
 
   const initialState : GameState ={
     roomId:'',
+    letter: '',
     players: [],
     currentRound: 0,
     categories: [],
-    answers: {},
-    gameStatus: 'waiting'
+    gameStatus: 'waiting',
+    isStop: false,
   }
   
 export const gameState = writable(initialState)

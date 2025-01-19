@@ -10,8 +10,6 @@
   let catg = $state("");
   let roomId = $state("");
   let player = $state("");
-  
-
 
   function addCategory() {
     inputCategories.push(catg);
@@ -51,24 +49,37 @@
       ...curr,
       gameStatus: "in-progress",
     }));
-    console.log("Game started with letter:", letter);
-    console.log("Game ID:", gameId);
-});
+    store.update((current) => ({
+      ...current,
+      letter: letter,
+      currentRound: current.currentRound + 1,
+    }));
+  });
+
+  ws.on("end-round", (gameId) => {
+    console.log(`Round ended for game ${gameId}`);
+
+    if ($store.gameStatus === "in-progress") {
+      submitAnswer();
+    }
+
+    // Atualiza o estado do jogo
+    store.update((current) => ({
+      ...current,
+      gameStatus: "finished",
+    }));
+  });
 
   function startGame() {
     ws.play(roomId);
-   
   }
 
-  function logInputs() {
+  function submitAnswer() {
     const formToSubmit: SubmitForm = {
       answers: inputAnswers,
       gameId: roomId,
       player: player,
     };
-    console.log(
-      `dei submite das respostars ${formToSubmit.answers} - ${formToSubmit.gameId} - ${formToSubmit.player}`
-    );
     ws.submitAnswer(formToSubmit);
   }
 </script>
@@ -81,24 +92,24 @@
 {#if roomId}
   <h4>{roomId}</h4>
 {/if}
-<input type="text" bind:value={catg} />
+<input type="text" bind:value={catg} placeholder="Category" />
 <button onclick={addCategory}>Add Category</button>
 <button onclick={createRoom}>Create a Game</button>
 
-<input type="text" bind:value={roomId} />
-<input type="text" bind:value={player} />
+<input type="text" bind:value={roomId} placeholder="Roomv Id" />
+<input type="text" bind:value={player} placeholder="Player name" />
 <button onclick={joinGame}>Join room</button>
 
 <button onclick={startGame}>Start Game</button>
 {#if $store.gameStatus === "in-progress"}
   {#each $store.categories as category, index}
+    <h3>{$store.letter}</h3>
     <p>{category}</p>
-
     <input
       type="text"
       bind:value={inputAnswers[index]}
       placeholder={`Input ${category}`}
     />
   {/each}
-  <button onclick={logInputs}>Submit</button>
+  <button onclick={submitAnswer}>Submit</button>
 {/if}

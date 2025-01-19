@@ -40,7 +40,7 @@ class SocketService {
   }
 
   // Stop the game
-  stop(gameId: string, callback: (gameId: string, result: any) => void) {
+  stop(gameId: string, callback: (gameId: string, result: Map<string,number>) => void) {
     this.socket.emit("on-stop", gameId);
 
     this.socket.on("stoped", (id, result) => {
