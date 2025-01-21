@@ -22,7 +22,7 @@ export interface Player {
     currentRound: 0,
     categories: [],
     gameStatus: 'waiting',
-    isStop: false,
+    isStop: true,
   }
   
 export const gameState = writable(initialState)

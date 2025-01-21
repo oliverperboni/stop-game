@@ -12,10 +12,9 @@ const PORT = 3000;
 // Create HTTP server
 const httpServer = createServer(app);
 
-// Initialize WebSocket server
 const io = new Server(httpServer, {
   cors: {
-    origin: '*', // Adjust based on your setup
+    origin: '*',
     methods: ['GET', 'POST']
   }
 });

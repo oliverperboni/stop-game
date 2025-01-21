@@ -28,3 +28,7 @@ export interface SubmitForm {
   answers: string[];
 }
 
+export type SocketPlayer = {
+  playerName: string,
+  socketId: string
+}

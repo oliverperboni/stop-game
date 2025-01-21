@@ -10,6 +10,7 @@
   let catg = $state("");
   let roomId = $state("");
   let player = $state("");
+  let alredySubmit = false
 
   function addCategory() {
     inputCategories.push(catg);
@@ -58,8 +59,7 @@
 
   ws.on("end-round", (gameId) => {
     console.log(`Round ended for game ${gameId}`);
-
-    if ($store.gameStatus === "in-progress") {
+    if ($store.gameStatus === "in-progress" && !alredySubmit) {
       submitAnswer();
     }
 
@@ -80,6 +80,8 @@
       gameId: roomId,
       player: player,
     };
+    alredySubmit = true
+
     ws.submitAnswer(formToSubmit);
   }
 </script>
