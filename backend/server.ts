@@ -1,41 +1,26 @@
-import express from "express";
-import http from "http";
-import { Server } from "socket.io";
-import cors from "cors";
-import { v4 as uuidv4 } from "uuid";
+import { createServer } from 'http'
+import app from './app';
+import { registerSocketEvents } from "./sockets/socketManager";
+import type { gameRoom } from "./models/models";
+import { StopGame } from "./db/db";
+import { Server } from 'socket.io';
+import { generateShortId } from './util/util';
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
+
+const PORT = 3000;
+
+// Create HTTP server
+const httpServer = createServer(app);
+
+// Initialize WebSocket server
+const io = new Server(httpServer, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
+    origin: '*', // Adjust based on your setup
+    methods: ['GET', 'POST']
+  }
 });
 
-app.use(cors());
-app.use(express.json());
-
-type joinRoom = {
-  roomId: string;
-  playerName: string;
-};
-
-type submitForm = {
-  gameId: string;
-  player: string;
-  answers: string[];
-};
-
-type gameRoom = {
-  id: string;
-  letter: string;
-  columns: string[];
-  playersWithAnswers: Map<string, string[]>;
-  isStop: boolean;
-};
-
-const StopGame: gameRoom[] = [];
+registerSocketEvents(io);
 
 // Rota para criar uma nova sala
 app.post("/create-room", (req: any, res: any) => {
@@ -51,7 +36,7 @@ app.post("/create-room", (req: any, res: any) => {
   }
 
   const newRoom: gameRoom = {
-    id: uuidv4(),
+    id: generateShortId(),
     letter: "",
     columns: categories,
     playersWithAnswers: new Map(),
@@ -67,198 +52,7 @@ app.post("/create-room", (req: any, res: any) => {
   });
 });
 
-// Rota inicial
-app.get("/", (_, res: any) => {
-  return res.status(200).json({ message: "hello to stop game" });
-});
 
-// Gerar letra do jogo
-const generateGameLetter = (): string => {
-  const letters = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-  ];
-
-  const randomIndex = Math.floor(Math.random() * letters.length);
-  const letter = letters[randomIndex];
-  console.log("Generated game letter:", letter);
-  return letter;
-};
-
-// Calcular resultado
-const calcResult = (gameId: string): Map<string, number> => {
-  console.log(`Calculating results for game ${gameId}`);
-
-  const theGame = StopGame.find((room) => room.id === gameId);
-  if (!theGame) {
-    console.log(`Game ${gameId} not found`);
-    return new Map();
-  }
-
-  const result = new Map<string, number>();
-
-  for (const [playerName] of theGame.playersWithAnswers) {
-    result.set(playerName, 0);
-  }
-
-  const columnAnswers = new Map<string, string>();
-  theGame.columns.forEach((_, columnIndex) => {
-    for (const [playerName, answers] of theGame.playersWithAnswers) {
-      const answer = answers[columnIndex];
-      if (answer) {
-        columnAnswers.set(playerName, answer.toLowerCase());
-      }
-    }
-
-    const answerCount = new Map<string, number>();
-    for (const answer of columnAnswers.values()) {
-      answerCount.set(answer, (answerCount.get(answer) || 0) + 1);
-    }
-
-    for (const [playerName, answer] of columnAnswers) {
-      let points = 0;
-
-      if (answer.toLowerCase().startsWith(theGame.letter.toLowerCase())) {
-        const occurrences = answerCount.get(answer) || 0;
-        points = occurrences === 1 ? 10 : 5;
-      }
-
-      const currentScore = result.get(playerName) || 0;
-      result.set(playerName, currentScore + points);
-    }
-  });
-
-  console.log(`Results calculated for game ${gameId}:`, result);
-  return result;
-};
-
-// Eventos de socket.io
-io.on("connection", (socket) => {
-  console.log("New socket connection:", socket.id);
-
-  socket.on("join-room", (req: joinRoom) => {
-    console.log(
-      `Player ${req.playerName} attempting to join room ${req.roomId}`
-    );
-
-    let roomFound = false;
-
-    StopGame.map((room) => {
-      if (room.id === req.roomId) {
-        roomFound = true;
-        room.playersWithAnswers.set(req.playerName, []);
-        socket.emit("joined-game", room.columns);
-        console.log(`Player ${req.playerName} joined room ${req.roomId}`);
-        console.log(room);
-      }
-    });
-    console.log(StopGame);
-
-    if (!roomFound) {
-      console.log(`Room ${req.roomId} not found`);
-    }
-
-    socket.join(req.roomId);
-  });
-
-  socket.on("submit-awnser", (answers: submitForm) => {
-    console.log(
-      `Player ${answers.player} submitted answers for game ${answers.gameId}:`,
-      answers.answers
-    );
-  
-    let roomFound = false;
-  
-    StopGame.map((room) => {
-      if (room.id === answers.gameId) {
-        roomFound = true;
-        room.playersWithAnswers.set(answers.player, answers.answers);
-        console.log(
-          `Answers updated for player ${answers.player} in room ${answers.gameId}`
-        );
-        room.isStop = true; // Marca que o round foi encerrado
-      }
-    });
-  
-
-    io.to(answers.gameId).emit("end-round", answers.gameId);
-  
-    if (!roomFound) {
-      console.log(`Room ${answers.gameId} not found`);
-    }
-  });
-  
-
-  socket.on("play", (gameId: string) => {
-    console.log(`Game play triggered for room ${gameId}`);
-
-    let roomFound = false;
-
-    StopGame.map((room) => {
-      if (room.id === gameId) {
-        roomFound = true;
-        room.letter = generateGameLetter();
-        room.isStop = !room.isStop;
-        io.to(gameId).emit("started", room.letter, gameId);
-        console.log(`Room ${gameId} updated:`, room);
-      }
-    });
-
-    if (!roomFound) {
-      console.log(`Room ${gameId} not found`);
-    }
-  });
-
-  socket.on("on-stop", (gameId: string) => {
-    console.log(`Stop triggered for room ${gameId}`);
-
-    let roomFound = false;
-
-    StopGame.map((room) => {
-      if (room.id === gameId) {
-        roomFound = true;
-        room.isStop = true;
-        console.log(`Room ${gameId} stopped`);
-      }
-    });
-
-    if (!roomFound) {
-      console.log(`Room ${gameId} not found`);
-    }
-
-    console.log(`Room ${gameId} stopped and emit the stop`);
-    io.to(gameId).emit("stoped", gameId, calcResult(gameId));
-  });
-
-  socket.on("game-finish", (gameId) => {
-    console.log(`Room ${gameId} ended the game`);
-    io.to(gameId).emit("game-finish", calcResult(gameId));
-  });
-
-  socket.on("disconnect", () => {
-    console.log(`Socket disconnected: ${socket.id}`);
-  });
-});
-
-const PORT = 3000;
-server.listen(PORT, "0.0.0.0", () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
