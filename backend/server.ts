@@ -22,7 +22,7 @@ const io = new Server(httpServer, {
 registerSocketEvents(io);
 
 // Rota para criar uma nova sala
-app.post("/create-room", (req: any, res: any) => {
+app.post("/room", (req: any, res: any) => {
   console.log("Received request to create room with data:", req.body);
 
   const { categories } = req.body;
