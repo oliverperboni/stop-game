@@ -24,11 +24,6 @@ export const registerSocketEvents = (io: Server): void => {
         }])
       }
 
-      console.log(
-        "updated the following socket and player list",
-        socketList.get(req.roomId)
-      );
-
       let roomFound = false;
 
       StopGame.map((room) => {
@@ -69,7 +64,7 @@ export const registerSocketEvents = (io: Server): void => {
 
       socketList.get(answers.gameId)?.forEach((socketPlayer) => {
         if (socketPlayer.playerName !== answers.player) {
-          io.to(socketPlayer.socketId).emit("end-round", answers.gameId);
+          io.to(socketPlayer.socketId).emit("end-round", answers.gameId, Object.entries(calcResult(answers.gameId)));
         }
       });
 
@@ -121,7 +116,7 @@ export const registerSocketEvents = (io: Server): void => {
 
     socket.on("game-finish", (gameId) => {
       console.log(`Room ${gameId} ended the game`);
-      io.to(gameId).emit("game-finish", calcResult(gameId));
+      io.to(gameId).emit("game-finish", Object.entries(calcResult(gameId)));
     });
 
     socket.on("disconnect", () => {
