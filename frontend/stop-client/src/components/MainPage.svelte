@@ -223,6 +223,7 @@
       {/if}
     </div>
   {/if}
+</div>
 
   <!-- <div class="bg-gray-800 p-4 rounded-xl shadow-lg m-1">
     <div class="flex flex-box justify-center m-2">
@@ -303,7 +304,6 @@
       </button>
     {/if}
   </div> -->
-</div>
 
 <!-- 
 {#each inputCategories as item}
