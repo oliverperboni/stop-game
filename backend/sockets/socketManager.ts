@@ -35,8 +35,6 @@ export const registerSocketEvents = (io: Server): void => {
           console.log(room);
         }
       });
-      console.log(StopGame);
-
       if (!roomFound) {
         console.log(`Room ${req.roomId} not found`);
       }
