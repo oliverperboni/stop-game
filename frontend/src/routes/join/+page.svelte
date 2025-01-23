@@ -16,6 +16,7 @@
       socketService.joinRoom(join, (categories) => {
         gameStore.update(current => ({
           ...current,
+          roomId: roomId,
           players: [...current.players, { name: join.playerName, score: 0 }],
           categories
         }));

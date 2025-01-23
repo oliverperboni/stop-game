@@ -8,25 +8,12 @@
   let alreadySubmit = false;
 
   onMount(() => {
-    socketService.on("started", (letter, gameId) => {
-      gameStore.update((curr) => ({
-        ...curr,
-        gameStatus: "in-progress",
-        letter: letter,
-        currentRound: curr.currentRound + 1,
-      }));
-    });
-
     socketService.on("end-round", (gameId) => {
       if ($gameStore.gameStatus === "in-progress" && !alreadySubmit) {
         submitAnswer();
       }
-      gameStore.update((curr) => ({
-        ...curr,
-        gameStatus: "finished",
-      }));
+      gameStore.update((curr) => ({ ...curr, gameStatus: "finished" }));
     });
-
     socketService.play($gameStore.roomId);
   });
 
