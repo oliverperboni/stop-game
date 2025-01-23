@@ -1,8 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import socketService  from '$lib/services/socketService';
-    import { gameStore } from '$lib/stores/gameStore';
-
+  
   
     function startGame() {
       goto('/game/play');
