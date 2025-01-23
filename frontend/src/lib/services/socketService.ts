@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import type { JoinRoom, SubmitForm } from "../models/models";
+import type { JoinRoom, SubmitForm } from "../types"
 
 
 class SocketService {
