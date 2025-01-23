@@ -12,14 +12,15 @@
     socketService.on("end-round", (gameId) => {
       if ($gameStore.gameStatus === "in-progress" && !alreadySubmit) {
         submitAnswer();
-       
       }
       gameStore.update((curr) => ({ ...curr, gameStatus: "finished" }));
-      goto("/results/"+$gameStore.roomId)
+      
+      
+      
     });
     socketService.play($gameStore.roomId);
   });
-
+  /// adiciona os jogadores com os player with anwsers da store
   function submitAnswer() {
     const formToSubmit: SubmitForm = {
       answers: inputAnswers,
@@ -28,6 +29,7 @@
     };
     alreadySubmit = true;
     socketService.submitAnswer(formToSubmit);
+    goto("/results/"+$gameStore.roomId) 
   }
 </script>
 

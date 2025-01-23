@@ -7,7 +7,7 @@
 </script>
 
 <div
-  class="min-h-screen bg-gray-900 text-gray-100 flex flex-col justify-center items-center p-6"
+  class=" bg-gray-900 text-gray-100 flex flex-col justify-center items-center p-6"
 >
   <div class="bg-gray-800 p-8 rounded-xl shadow-lg text-center max-w-lg">
     <h1 class="text-4xl font-bold text-purple-500 mb-4">
@@ -25,7 +25,7 @@
 
     <button
       onclick={navigateToCreateGame}
-      class="w-full p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none mt-2"
+      class="w-full p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none mt-4 mb-2"
     >
       Create a new game
     </button>
