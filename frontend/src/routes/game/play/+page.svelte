@@ -3,6 +3,7 @@
   import { gameStore } from "$lib/stores/gameStore";
   import socketService from "$lib/services/socketService";
   import type { SubmitForm } from "$lib/types";
+  import { goto } from "$app/navigation";
 
   let inputAnswers: string[] = [];
   let alreadySubmit = false;
@@ -11,8 +12,10 @@
     socketService.on("end-round", (gameId) => {
       if ($gameStore.gameStatus === "in-progress" && !alreadySubmit) {
         submitAnswer();
+       
       }
       gameStore.update((curr) => ({ ...curr, gameStatus: "finished" }));
+      goto("/results/"+$gameStore.roomId)
     });
     socketService.play($gameStore.roomId);
   });

@@ -1,3 +1,4 @@
+import { log } from "console";
 import { StopGame } from "../db/db";
 import { gameRoom } from "../models/models";
 import { calcResult, generateShortId } from "../util/util";
@@ -35,9 +36,15 @@ export const gameController = {
     const gameId = req.params.gameId;
     const room = StopGame.find((room) => room.id === gameId);
     if (room) {
-      res.status(200).json(calcResult(gameId));
+      const rows = Array.from(calcResult(gameId), ([playerName, score]) => [
+        playerName,
+        score.toString(),
+      ]);
+      console.log(rows)
+
+      res.status(200).json(rows);
     } else {
-      res.status(404).json("Not found");
+      res.status(404).json({ error: "Not found" });
     }
   },
 };

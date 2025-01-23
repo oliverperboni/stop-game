@@ -18,7 +18,8 @@
           ...current,
           roomId: roomId,
           players: [...current.players, { name: join.playerName, score: 0 }],
-          categories
+          categories,
+          currentPlayer:player,
         }));
       });
       
