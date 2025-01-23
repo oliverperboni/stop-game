@@ -1,7 +1,7 @@
 
 import { StopGame } from '../db/db';
 import { gameRoom } from '../models/models';
-import { generateShortId } from '../util/util';
+import { calcResult, generateShortId } from '../util/util';
 
 export const gameController = {
   createRoom: (req:any, res:any) => {
@@ -32,4 +32,15 @@ export const gameController = {
       categories: newRoom.columns,
     });
   },
+  getGameResult: (req:any,res:any)=>{
+    const gameId = req.params.gameId
+    const room = StopGame.find((room)=> room.id === gameId)
+    if(room){
+       res.status(200).json(calcResult(gameId))
+    }else{
+      res.status(404).json("Not found")
+    }
+    
+
+  }
 };
