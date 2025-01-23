@@ -5,7 +5,6 @@
 
   
     function startGame() {
-      socketService.play($gameStore.roomId);
       goto('/game/play');
     }
   </script>

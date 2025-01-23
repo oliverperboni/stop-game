@@ -9,6 +9,7 @@
   
     onMount(() => {
       socketService.on("started", (letter, gameId) => {
+        console.log("RECEBI O SINAL QUE COEMVOU O JOGO")
         gameStore.update(curr => ({
           ...curr,
           gameStatus: "in-progress",
@@ -26,6 +27,8 @@
           gameStatus: "finished"
         }));
       });
+
+      socketService.play($gameStore.roomId);
     });
   
     function submitAnswer() {
