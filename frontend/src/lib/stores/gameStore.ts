@@ -41,6 +41,8 @@ type GameStore = {
   letter: string;
   gameStatus: 'waiting' | 'in-progress' | 'finished';
   currentPlayer: string;
+  alreadySubmit: boolean;
+
 };
 
 const initialState: GameStore = {
@@ -51,6 +53,7 @@ const initialState: GameStore = {
   letter: '',
   gameStatus: 'waiting',
   currentPlayer: '',
+  alreadySubmit: false,
 };
 
 export const gameStore = writable<GameStore>(initialState);

@@ -11,6 +11,7 @@
         gameStatus: "in-progress",
         letter: letter,
         currentRound: curr.currentRound + 1,
+        alreadySubmit: false
       }));
       goto("/game/play");
     });

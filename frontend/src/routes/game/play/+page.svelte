@@ -6,17 +6,16 @@
   import { goto } from "$app/navigation";
 
   let inputAnswers: string[] = [];
-  let alreadySubmit = false;
 
   onMount(() => {
+    inputAnswers = []
+    console.log("USUARIO:",$gameStore.currentPlayer,"VAI SUBMETER ? : ",$gameStore.alreadySubmit)
+    console.log("ESTADO INICIAL DAS RESPOSTAS QUE ESTAO A SER ENVIADAS",inputAnswers)
     socketService.on("end-round", (gameId) => {
-      if ($gameStore.gameStatus === "in-progress" && !alreadySubmit) {
+      if ($gameStore.gameStatus === "in-progress" && !$gameStore.alreadySubmit) {
         submitAnswer();
       }
       gameStore.update((curr) => ({ ...curr, gameStatus: "finished" }));
-      
-      
-      
     });
     socketService.play($gameStore.roomId);
   });
@@ -27,7 +26,8 @@
       gameId: $gameStore.roomId,
       player: $gameStore.currentPlayer,
     };
-    alreadySubmit = true;
+    console.log("RESPOSTAS QUE ESTAO A SER ENVIADAS",inputAnswers)
+    gameStore.update((curr) => ({ ...curr, alreadySubmit: true }));
     socketService.submitAnswer(formToSubmit);
     goto("/results/"+$gameStore.roomId) 
   }
@@ -48,7 +48,7 @@
       </div>
     {/each}
     <button
-      on:click={submitAnswer}
+      onclick={submitAnswer}
       class="w-full p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none"
     >
       Submit
