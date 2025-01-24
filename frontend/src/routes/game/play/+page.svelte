@@ -6,20 +6,25 @@
   import { goto } from "$app/navigation";
 
   let inputAnswers: string[] = [];
-
+  let alreadySubmit = $state(false)
+ $effect(()=> {
+   console.log('ENTREI NO EFFECT_________________')
+   alreadySubmit= false
+   inputAnswers =  []
+ })
   onMount(() => {
-    inputAnswers = []
-    console.log("USUARIO:",$gameStore.currentPlayer,"VAI SUBMETER ? : ",$gameStore.alreadySubmit)
+    console.log("USUARIO:",$gameStore.currentPlayer,"VAI SUBMETER ? : ",alreadySubmit)
     console.log("ESTADO INICIAL DAS RESPOSTAS QUE ESTAO A SER ENVIADAS",inputAnswers)
     socketService.on("end-round", (gameId) => {
-      if ($gameStore.gameStatus === "in-progress" && !$gameStore.alreadySubmit) {
+      console.log("WEB SOCKET --- ALTEREI O ALREADY SUBMIT DO USER",$gameStore.currentPlayer,"PARA",alreadySubmit);
+      console.log("RECEBI E VOU ENVIAR ESSA RESPOSTAS", inputAnswers);
+      if (!alreadySubmit) {
         submitAnswer();
       }
       gameStore.update((curr) => ({ ...curr, gameStatus: "finished" }));
     });
     socketService.play($gameStore.roomId);
   });
-  /// adiciona os jogadores com os player with anwsers da store
   function submitAnswer() {
     const formToSubmit: SubmitForm = {
       answers: inputAnswers,
@@ -27,7 +32,9 @@
       player: $gameStore.currentPlayer,
     };
     console.log("RESPOSTAS QUE ESTAO A SER ENVIADAS",inputAnswers)
-    gameStore.update((curr) => ({ ...curr, alreadySubmit: true }));
+    // gameStore.update((curr) => ({ ...curr, alreadySubmit: true }));
+    alreadySubmit = true;
+    console.log("SUBMIT --- ALTEREI O ALREADY SUBMIT DO USER",$gameStore.currentPlayer,"PARA",alreadySubmit);
     socketService.submitAnswer(formToSubmit);
     goto("/results/"+$gameStore.roomId) 
   }

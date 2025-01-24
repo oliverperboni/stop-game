@@ -47,6 +47,7 @@
             ...curr,
             alreadySubmit: false
         }));
+        console.log("NO RESULT --- ALTEREI O ALREADY SUBMIT DO USER",$gameStore.currentPlayer,"PARA",$gameStore.alreadySubmit);
         goto("/game/lobby")
     }
 </script>
