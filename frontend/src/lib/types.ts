@@ -6,7 +6,7 @@ export type joinRoom = {
 export type submitForm = {
   gameId: string;
   player: string;
-  awnsers: string[];
+  answers: string[];
 };
 
 export type gameRoom = {
@@ -15,7 +15,16 @@ export type gameRoom = {
   columns: string[];
   playersWithAnswers: Map<string, string[]>;
   isStop: boolean;
+  round: number
 };
+
+export type answersPerRound = {
+  gameId : string;
+  round: number;
+  letter: string
+  playersWithAnswers: Map<string, string[]>;
+  
+}
 
 export interface JoinRoom {
   playerName: string;
@@ -26,4 +35,9 @@ export interface SubmitForm {
   player: string;
   gameId: string;
   answers: string[];
+}
+
+export type SocketPlayer = {
+  playerName: string,
+  socketId: string
 }
