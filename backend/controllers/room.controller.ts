@@ -36,10 +36,21 @@ export const gameController = {
   getGameResult: (req: any, res: any) => {
     const gameId = req.params.gameId;
     const room = StopGame.find((room) => room.id === gameId);
+
     if (room) {
-      res.status(200).json(calcResult(gameId));
+      const result = Array.from(room.playersWithAnswers).map(([playerId, answers]) => {
+        const score = calcResult(gameId).get(playerId);
+        return [playerId, ...answers, score];
+      });
+
+
+      res.status(200).json({
+        status: 'success',
+        data: result
+      });
     } else {
-      res.status(404).json("Not found");
+      res.status(404).json({ status: 'error', message: 'Game not found' });
     }
   },
+
 };

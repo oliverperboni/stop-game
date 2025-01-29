@@ -25,7 +25,7 @@
         );
 
         data = await response.json();
-        rows = data;
+        rows = data.data;
         console.log(data);
     });
 
