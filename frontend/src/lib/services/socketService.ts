@@ -29,7 +29,7 @@ class SocketService {
 
   // Emit answers to the server
   submitAnswer(data: SubmitForm) {
-    this.socket.emit("submit-awnser", data);
+    this.socket.emit("submit-answer", data);
     console.log(`Respostas enviadas para o jogo ${data.gameId}:`, data.answers);
   }
 

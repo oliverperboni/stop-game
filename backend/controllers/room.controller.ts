@@ -22,6 +22,7 @@ export const gameController = {
       columns: categories,
       playersWithAnswers: new Map(),
       isStop: false,
+      round: 0,
     };
 
     StopGame.push(newRoom);

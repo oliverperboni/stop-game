@@ -15,7 +15,16 @@ export type gameRoom = {
   columns: string[];
   playersWithAnswers: Map<string, string[]>;
   isStop: boolean;
+  round: number
 };
+
+export type answersPerRound = {
+  gameId : string;
+  round: number;
+  letter: string
+  playersWithAnswers: Map<string, string[]>;
+  
+}
 
 export interface JoinRoom {
   playerName: string;
