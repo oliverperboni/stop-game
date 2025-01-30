@@ -5,11 +5,17 @@
   let catg = $state("");
 
   function addCategory() {
-    inputCategories = [...inputCategories, catg];
+    if (catg.trim() === "") return; // Evita adicionar categorias vazias
+    inputCategories = [...inputCategories, catg.trim()];
     catg = "";
   }
 
   async function createRoom() {
+    if (inputCategories.length === 0) {
+      alert("Please add at least one category before creating a game.");
+      return;
+    }
+
     const response = await fetch("http://localhost:3000/room", {
       method: "POST",
       headers: {
@@ -27,32 +33,46 @@
     goto("/join");
   }
 </script>
-
-<div class="bg-gray-800 p-4 rounded-xl shadow-lg m-1">
-  <div class="flex flex-wrap justify-center space-x-2 m-2">
+<div class="py-48">
+<div class="bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-md mx-auto ">
+  <!-- Display Categories -->
+  <div class="flex flex-wrap gap-2 mb-4 justify-center space-x-2 m-2">
     {#each inputCategories as item}
-      <p class="text-white bg-purple-600 px-3 py-1 rounded-md hover:bg-purple-700 focus:outline-none mb-2">{item}</p>
+      <div class="bg-purple-600 text-white px-3 py-1 rounded-md hover:bg-purple-700 transition duration-300">
+        {item}
+      </div>
     {:else}
-      <p class="text-gray-400 mt-2">No categories</p>
+      <p class="text-gray-400 text-sm">No categories added yet.</p>
     {/each}
   </div>
-  <input
-    type="text"
-    bind:value={catg}
-    placeholder="Category"
-    class="w-full p-2 mb-4 bg-gray-700 text-white border-2 border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-  />
-  <button
-    onclick={addCategory}
-    class="w-full p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none mb-2"
-  >
-    Add Category
-  </button>
 
-  <button
-    onclick={createRoom}
-    class="w-full p-2 mb-4 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none"
-  >
+  <!-- Input for New Category -->
+  <input
+          bind:value={catg}
+          class="w-full p-2 mb-4 bg-gray-700 text-white border-2 border-gray-600 rounded focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500 transition duration-300"
+          onkeydown={(e) => e.key === "Enter" && addCategory()}
+          placeholder="Enter a category"
+          type="text"
+  />
+
+  <!-- Buttons -->
+  <div class="space-y-2">
+    <button
+            onclick={addCategory}
+            class="w-full p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
+    >
+      Add Category
+    </button>
+
+    <button
+            onclick={createRoom}
+            class="w-full p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
+            disabled={inputCategories.length === 0}
+    class:opacity-50={inputCategories.length === 0}
+    class:cursor-not-allowed={inputCategories.length === 0}
+    >
     Create a Game
-  </button>
+    </button>
+  </div>
+</div>
 </div>
