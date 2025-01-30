@@ -40,6 +40,7 @@ app.post("/room", (req: any, res: any) => {
     columns: categories,
     playersWithAnswers: new Map(),
     isStop: false,
+    round:0
   };
 
   StopGame.push(newRoom);

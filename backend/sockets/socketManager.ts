@@ -1,7 +1,7 @@
-import { Server, Socket } from "socket.io";
-import type { answersPerRound, joinRoom, submitForm } from "../models/models";
-import { StopGame, resultPerRound, socketList } from "../db/db";
-import { calcResult, generateGameLetter } from "../util/util";
+import {Server, Socket} from "socket.io";
+import type {answersPerRound, joinRoom, submitForm} from "../models/models";
+import {StopGame, resultPerRound, socketList, resultPerGameList} from "../db/db";
+import {calcResult, generateGameLetter} from "../util/util";
 
 export const registerSocketEvents = (io: Server): void => {
     io.on("connection", (socket) => {
@@ -42,57 +42,59 @@ export const registerSocketEvents = (io: Server): void => {
             socket.join(req.roomId);
         });
 
-    socket.on("submit-answer", (answers: submitForm) => {
-      console.log(
-        `Player ${answers.player} submitted answers for game ${answers.gameId}:`,
-        answers.answers
-      );
-      let roomFound = false;
-      let currentRound = -1;
-      let currentLetter = ""
+        socket.on("submit-answer", (answers: submitForm) => {
+            console.log(
+                `Player ${answers.player} submitted answers for game ${answers.gameId}:`,
+                answers.answers
+            );
+            let roomFound = false;
+            let currentRound = -1;
+            let currentLetter = ""
 
-      StopGame.map((room) => {
-        if (room.id === answers.gameId) {
-          currentRound = room.round;
-          currentLetter = room.letter
-          roomFound = true;
-          room.playersWithAnswers.set(answers.player, answers.answers);
-          console.log(
-            `Answers updated for player ${answers.player} in room ${answers.gameId}`
-          );
-        }
-      });
+            StopGame.map((room) => {
+                if (room.id === answers.gameId) {
+                    currentRound = room.round;
+                    currentLetter = room.letter
+                    roomFound = true;
+                    room.round = currentRound + 1;
+                    room.playersWithAnswers.set(answers.player, answers.answers);
+                    console.log(
+                        `Answers updated for player ${answers.player} in room ${answers.gameId}`
+                    );
+                }
+            });
+            resultPerGameList.map((curr) => {
+                if(curr.gameId === answers.gameId){
+                    curr.playersResults.set(answers.player,curr.playersResults.get(answers.player) || 0 );
+                }
+            })
 
-      // Verifica se já existe um resultado para a rodada atual
-      const result = resultPerRound.find((current) => current.gameId === answers.gameId);
+            // Verifica se já existe um resultado para a rodada atual
+            const result = resultPerRound.find((current) => current.gameId === answers.gameId);
 
-      if (result) {
-        // Atualiza as respostas para a rodada atual
-        result.round = currentRound; // Atualiza o número da rodada
-        result.letter = currentLetter // Atualiza a letra
-        result.playersWithAnswers.set(answers.player, answers.answers); // Armazena as respostas do jogador
-      } else {
-        // Se não existir, cria um novo registro para o jogo
-        const newResult: answersPerRound = {
-          gameId: answers.gameId,
-          round: currentRound,
-          letter:currentLetter,
-          playersWithAnswers: new Map([[answers.player, answers.answers]]),
-        };
-        resultPerRound.push(newResult);
-      }
 
-      // Notifica os outros jogadores na sala
-      socketList.get(answers.gameId)?.forEach((socketPlayer) => {
-        if (socketPlayer.playerName !== answers.player) {
-          io.to(socketPlayer.socketId).emit("end-round", answers.gameId);
-        }
-      });
+            // Se não existir, cria um novo registro para o jogo
+            const newResult: answersPerRound = {
+                gameId: answers.gameId,
+                round: currentRound,
+                letter: currentLetter,
+                playersWithAnswers: new Map([[answers.player, answers.answers]]),
+            };
+            resultPerRound.push(newResult);
+            console.log(`---------------------Results calculated for game ${answers.gameId}:`, resultPerRound,"---------------------");
 
-      if (!roomFound) {
-        console.log(`Room ${answers.gameId} not found`);
-      }
-    });
+
+            // Notifica os outros jogadores na sala
+            socketList.get(answers.gameId)?.forEach((socketPlayer) => {
+                if (socketPlayer.playerName !== answers.player) {
+                    io.to(socketPlayer.socketId).emit("end-round", answers.gameId);
+                }
+            });
+
+            if (!roomFound) {
+                console.log(`Room ${answers.gameId} not found`);
+            }
+        });
 
 
         socket.on("play", (gameId: string) => {
@@ -100,16 +102,16 @@ export const registerSocketEvents = (io: Server): void => {
 
             let roomFound = false;
 
-      StopGame.map((room) => {
-        if (room.id === gameId) {
-          roomFound = true;
-          room.letter = generateGameLetter();
-          room.isStop = !room.isStop;
-          room.round = room.round++
-          io.to(gameId).emit("started", room.letter, gameId);
-          console.log(`Room ${gameId} updated:`, room);
-        }
-      });
+            StopGame.map((room) => {
+                if (room.id === gameId) {
+                    roomFound = true;
+                    room.letter = generateGameLetter();
+                    room.isStop = !room.isStop;
+                    room.round = room.round++
+                    io.to(gameId).emit("started", room.letter, gameId);
+                    console.log(`Room ${gameId} updated:`, room);
+                }
+            });
 
             if (!roomFound) {
                 console.log(`Room ${gameId} not found`);
