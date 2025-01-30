@@ -68,7 +68,7 @@ export const gameController = {
     },
     getActiveRoom: (req: any, res: any) => {
         const activeRooms = StopGame.filter((room) => room.isStop);
-        res.status(200).json(activeRooms)
+        res.status(200).json({status: 'success', rooms: activeRooms});
     }
 
 };

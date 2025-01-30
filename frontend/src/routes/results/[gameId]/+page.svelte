@@ -26,7 +26,6 @@
 
         data = await response.json();
         rows = data.data;
-        console.log(data);
     });
 
     function insertArrayBetween(

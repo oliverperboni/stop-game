@@ -2,8 +2,28 @@
     import { goto } from '$app/navigation';
     import { gameStore } from '$lib/stores/gameStore';
     import  socketService  from '$lib/services/socketService';
-    import type { JoinRoom } from '$lib/types';
-  
+    import type {gameRoom, JoinRoom} from '$lib/types';
+    import {onMount} from "svelte";
+
+    onMount(async () => {
+      const response = await fetch(
+              "http://localhost:3000/room",
+              {
+                method: "GET",
+                // headers: {
+                //   "Content-Type": "application/json",
+                // },
+              }
+      );
+
+      let data= await response.json();
+      let rooms : gameRoom[] = data.rooms;
+      console.log("12312312312312",rooms);
+      rooms.forEach(room => {
+        console.log(room.columns);
+      })
+
+    });
     let player = $state("");
     let roomId = $state($gameStore.roomId);
   

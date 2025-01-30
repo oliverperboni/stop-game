@@ -2,7 +2,10 @@ export type joinRoom = {
   roomId: string;
   playerName: string;
 };
-
+export type  resultPerGame = {
+  gameId: string,
+  playersResults: Map<string,number>,
+}
 export type submitForm = {
   gameId: string;
   player: string;
@@ -23,7 +26,7 @@ export type answersPerRound = {
   round: number;
   letter: string
   playersWithAnswers: Map<string, string[]>;
-  
+
 }
 
 export interface JoinRoom {
