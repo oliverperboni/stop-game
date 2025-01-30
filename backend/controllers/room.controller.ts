@@ -27,7 +27,7 @@ export const gameController = {
             letter: "",
             columns: categories,
             playersWithAnswers: new Map(),
-            isStop: false,
+            isStop: true,
             round: 0,
         };
 
@@ -57,23 +57,18 @@ export const gameController = {
             res.status(404).json({status: 'error', message: 'Game not found'});
         }
     },
-    getFinalResult: (req: any, res: any) => {
+    endGame: (req: any, res: any) => {
         const gameId = req.params.gameId;
-        const room = resultPerRound.find((room) => room.gameId === gameId);
-
-        if (room) {
-            const result = Array.from(room.playersWithAnswers).map(([playerId, answers]) => {
-                const score = calcResult(gameId).get(playerId);
-                return [playerId, ...answers, score];
-            });
-
-            res.status(200).json({
-                status: 'success',
-                data: result
-            });
-        } else {
-            res.status(404).json({status: 'error', message: 'Game not found'});
-        }
+        const room = StopGame.map((room) => {
+            if (room.id === gameId) {
+                room.isStop = false;
+            }
+        });
+        res.status(200).json({status: 'success', message: "game ended"});
+    },
+    getActiveRoom: (req: any, res: any) => {
+        const activeRooms = StopGame.filter((room) => room.isStop);
+        res.status(200).json(activeRooms)
     }
 
 };

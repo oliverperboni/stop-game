@@ -106,7 +106,7 @@ export const registerSocketEvents = (io: Server): void => {
                 if (room.id === gameId) {
                     roomFound = true;
                     room.letter = generateGameLetter();
-                    room.isStop = !room.isStop;
+                    // room.isStop = !room.isStop;
                     room.round = room.round++
                     io.to(gameId).emit("started", room.letter, gameId);
                     console.log(`Room ${gameId} updated:`, room);
