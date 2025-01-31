@@ -3,6 +3,7 @@
     import {gameStore} from "$lib/stores/gameStore";
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
+    import socketService from "$lib/services/socketService";
 
     let data: any;
     let isLoading = $state(false);
@@ -23,6 +24,9 @@
                 },
             }
         );
+        socketService.on("game-finish", ()=>{
+            goto("/")
+        })
 
         data = await response.json();
         rows = data.data;
@@ -50,6 +54,9 @@
                 },
             }
         );
+        socketService.finishGame($page.params.gameId, ()=>{
+            goto("/")
+        })
         goto("/")
     }
 

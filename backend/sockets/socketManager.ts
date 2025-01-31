@@ -141,7 +141,7 @@ export const registerSocketEvents = (io: Server): void => {
 
         socket.on("game-finish", (gameId) => {
             console.log(`Room ${gameId} ended the game`);
-            io.to(gameId).emit("game-finish", Object.entries(calcResult(gameId)));
+            io.to(gameId).emit("game-finish")
         });
 
         socket.on("disconnect", () => {
