@@ -78,7 +78,7 @@ export const calcResult = (gameId: string): Map<string, number> => {
         for (const [playerName, answer] of columnAnswers) {
             let points = 0;
 
-            if (answer.toLowerCase().startsWith(theGame.letter.toLowerCase())) {
+            if (answer.toLowerCase().startsWith(theGame.letter.toLowerCase()) && answer.length > 1) {
                 const occurrences = answerCount.get(answer) || 0;
                 points = occurrences === 1 ? 10 : 5;
             }

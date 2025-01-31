@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { gameStore } from "$lib/stores/gameStore";
+  import {URL_BACKEND} from "$lib/env";
   let inputCategories: string[] = $state([]);
   let catg = $state("");
 
@@ -16,7 +17,7 @@
       return;
     }
 
-    const response = await fetch("http://localhost:3000/room", {
+    const response = await fetch(URL_BACKEND+"/room", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

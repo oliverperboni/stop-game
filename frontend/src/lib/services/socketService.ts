@@ -1,12 +1,13 @@
 import { io, Socket } from "socket.io-client";
 import type { JoinRoom, SubmitForm } from "../types"
+import {URL_BACKEND} from "$lib/env";
 
 
 class SocketService {
   private socket: Socket;
 
   constructor() {
-    this.socket = io("http://localhost:3000"); // Substitua pelo URL do seu backend
+    this.socket = io(URL_BACKEND);
 
     this.socket.on("connect", () => {
       console.log("Conectado ao servidor", this.socket.id);
