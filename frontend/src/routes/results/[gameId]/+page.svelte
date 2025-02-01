@@ -7,7 +7,7 @@
     import { URL_BACKEND } from "$lib/env";
 
     let data: any;
-    let isLoading = $state(true); // Inicializa como true para indicar que está carregando
+    let isLoading = $state(true);
     let rows: string[][] = $state([]);
     let cat = $gameStore.categories;
     let headers: string[] = $state(["player", "score"]);
@@ -15,7 +15,6 @@
 
     headers = newHeader;
 
-    // Função para adicionar um delay
     function delay(ms: number) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
@@ -23,6 +22,7 @@
     onMount(async () => {
         try {
             await delay(2000);
+            rows=[]
 
             // Faz a requisição à API
             const response = await fetch(URL_BACKEND + "/result/" + $page.params.gameId, {

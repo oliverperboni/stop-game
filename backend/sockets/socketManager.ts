@@ -36,9 +36,12 @@ export const registerSocketEvents = (io: Server): void => {
             StopGame.map((room) => {
                 if (room.id === req.roomId) {
                     roomFound = true;
-                    if (!room.playersWithAnswers.get(req.playerName)) {
+                    if (room.playersWithAnswers.get(req.playerName)) {
+                        console.log(`Player ${req.playerName} re-joined room ${req.roomId}`);
+                    } else {
                         room.playersWithAnswers.set(req.playerName, []);
                     }
+
                     socket.emit("joined-game", room.columns);
                     console.log(`Player ${req.playerName} joined room ${req.roomId}`);
                     console.log(room);
