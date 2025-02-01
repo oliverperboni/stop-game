@@ -31,6 +31,7 @@ export const generateGameLetter = (): string => {
 };
 
 const processedRounds = new Map<string, Set<number>>();
+const resultPerGameMap = new Map<string, { playersResults: Map<string, number> }>();
 
 export const calcResult = (gameId: string): Map<string, number> => {
     console.log(`Calculating results for game ${gameId}`);
@@ -43,70 +44,61 @@ export const calcResult = (gameId: string): Map<string, number> => {
 
     const currentRound = theGame.round;
 
-    if (!processedRounds.has(gameId)) {
-        processedRounds.set(gameId, new Set());
-    }
-    if (processedRounds.get(gameId)?.has(currentRound)) {
+    // Inicializa estruturas de controle
+    let gameProcessedRounds = processedRounds.get(gameId) || new Set<number>();
+    processedRounds.set(gameId, gameProcessedRounds);
+
+    // Verifica se o round já foi processado
+    if (gameProcessedRounds.has(currentRound)) {
         console.log(`Results for round ${currentRound} of game ${gameId} already calculated.`);
-        let plau = resultPerGameList.find((curr) => curr.gameId === gameId)?.playersResults || new Map()
-        console.log('SEGUNDA VEZ A CALCULAR AS CEN AS',plau)
-        return plau;
+        return resultPerGameMap.get(gameId)?.playersResults || new Map();
     }
 
-    processedRounds.get(gameId)?.add(currentRound); // Marca o round como processado
+    // Atualiza estado do processamento
+    gameProcessedRounds.add(currentRound);
 
-    const result = new Map<string, number>();
-
-    for (const [playerName] of theGame.playersWithAnswers) {
-        result.set(playerName, 0);
+    // Inicializa ou obtém resultados existentes
+    let gameResults = resultPerGameMap.get(gameId);
+    if (!gameResults) {
+        gameResults = {
+            playersResults: new Map(Array.from(theGame.playersWithAnswers.keys()).map(player => [player, 0]))
+        };
+        resultPerGameMap.set(gameId, gameResults);
     }
 
-    const columnAnswers = new Map<string, string>();
-    theGame.columns.forEach((_, columnIndex) => {
+    const gameLetter = theGame.letter.toLowerCase();
+
+    for (const [columnIndex] of theGame.columns.entries()) {
+        const columnAnswers = new Map<string, string>();
+
+        // Coleta respostas válidas
         for (const [playerName, answers] of theGame.playersWithAnswers) {
-            const answer = answers[columnIndex];
-            if (answer) {
-                columnAnswers.set(playerName, answer.toLowerCase());
+            const answer = answers[columnIndex]?.toLowerCase();
+            if (answer?.startsWith(gameLetter)) {
+                columnAnswers.set(playerName, answer);
             }
         }
 
+        // Conta ocorrências das respostas
         const answerCount = new Map<string, number>();
         for (const answer of columnAnswers.values()) {
             answerCount.set(answer, (answerCount.get(answer) || 0) + 1);
         }
 
+        // Atualiza pontuação
         for (const [playerName, answer] of columnAnswers) {
-            let points = 0;
+            const occurrences = answerCount.get(answer) || 0;
+            const points = occurrences === 1 ? 10 : 5;
 
-            if (answer.toLowerCase().startsWith(theGame.letter.toLowerCase()) && answer.length > 1) {
-                const occurrences = answerCount.get(answer) || 0;
-                points = occurrences === 1 ? 10 : 5;
-            }
-
-            const resultToUpdate = resultPerGameList.find((curr) => curr.gameId === gameId);
-            let currentScore = 0;
-
-            if (resultToUpdate) {
-                const nextScore = resultToUpdate.playersResults.get(playerName);
-                currentScore = nextScore || 0;
-            }
-
-            resultPerGameList.forEach((curr) => {
-                if (curr.gameId === gameId) {
-                    curr.playersResults.set(playerName, currentScore + points);
-                }
-            });
-
-            result.set(playerName, points);
+            // Mantém a pontuação acumulada
+            const currentScore = gameResults.playersResults.get(playerName) || 0;
+            gameResults.playersResults.set(playerName, currentScore + points);
         }
-    });
-    const realResults = resultPerGameList.find((curr) => curr.gameId === gameId);
-    console.log('THE REAL RESULT IS',realResults);
-    console.log(`Results calculated for round ${currentRound} in game ${gameId}:`, result);
-    return realResults!.playersResults;
+    }
+
+    console.log('Resultado acumulado:', gameResults.playersResults);
+    return new Map(gameResults.playersResults);
 };
-
-
 
 export const generateShortId = () => {
     return Math.random().toString(36).substring(2, 10);

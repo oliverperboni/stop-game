@@ -16,6 +16,7 @@ export type gameRoom = {
   id: string;
   letter: string;
   columns: string[];
+  roundStarted: boolean;
   playersWithAnswers: Map<string, string[]>;
   isStop: boolean;
   round: number

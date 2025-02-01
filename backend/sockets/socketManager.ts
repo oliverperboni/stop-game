@@ -47,6 +47,12 @@ export const registerSocketEvents = (io: Server): void => {
                 `Player ${answers.player} submitted answers for game ${answers.gameId}:`,
                 answers.answers
             );
+            StopGame.map((room) => {
+                if (room.id === answers.gameId) {
+                    room.roundStarted = false;
+                    console.log(`Round reset for room ${answers.gameId}`);
+                }
+            });
             let roomFound = false;
             let currentRound = -1;
             let currentLetter = ""
@@ -69,7 +75,6 @@ export const registerSocketEvents = (io: Server): void => {
                 }
             })
 
-            // Verifica se já existe um resultado para a rodada atual
             const result = resultPerRound.find((current) => current.gameId === answers.gameId);
 
 
@@ -81,10 +86,8 @@ export const registerSocketEvents = (io: Server): void => {
                 playersWithAnswers: new Map([[answers.player, answers.answers]]),
             };
             resultPerRound.push(newResult);
-            console.log(`---------------------Results calculated for game ${answers.gameId}:`, resultPerRound,"---------------------");
 
 
-            // Notifica os outros jogadores na sala
             socketList.get(answers.gameId)?.forEach((socketPlayer) => {
                 if (socketPlayer.playerName !== answers.player) {
                     io.to(socketPlayer.socketId).emit("end-round", answers.gameId);
@@ -105,11 +108,16 @@ export const registerSocketEvents = (io: Server): void => {
             StopGame.map((room) => {
                 if (room.id === gameId) {
                     roomFound = true;
-                    room.letter = generateGameLetter();
-                    // room.isStop = !room.isStop;
-                    room.round = room.round++
-                    io.to(gameId).emit("started", room.letter, gameId);
-                    console.log(`Room ${gameId} updated:`, room);
+
+                    if (!room.roundStarted) {
+                        room.letter = generateGameLetter();
+                        room.round++;
+                        room.roundStarted = true;
+                        io.to(gameId).emit("started", room.letter, gameId);
+                        console.log(`Room ${gameId} updated:`, room);
+                    } else {
+                        io.to(gameId).emit("started", room.letter, gameId);
+                    }
                 }
             });
 

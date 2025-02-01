@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>{status} {error.message}</title>
+    <style>
+        body { font-family: system-ui; padding: 2rem; text-align: center; }
+        h1 { color: #ff3e00; font-size: 4rem; margin-bottom: 1rem; }
+        pre { max-width: 600px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+<h1>{status}</h1>
+<p>{error.message}</p>
+{#if dev && error.stack}
+<pre>{error.stack}</pre>
+{/if}
+</body>
+</html>

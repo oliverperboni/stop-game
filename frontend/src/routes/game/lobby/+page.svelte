@@ -29,7 +29,7 @@
 </script>
 <div class="py-48">
 <button
-        on:click={startGame}
+        onclick={startGame}
         class="mt-6 p-4 bg-purple-700 text-white rounded-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={isLoading}
 >
