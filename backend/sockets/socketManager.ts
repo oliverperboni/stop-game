@@ -62,7 +62,6 @@ export const registerSocketEvents = (io: Server): void => {
                     currentRound = room.round;
                     currentLetter = room.letter
                     roomFound = true;
-                    room.round = currentRound + 1;
                     room.playersWithAnswers.set(answers.player, answers.answers);
                     console.log(
                         `Answers updated for player ${answers.player} in room ${answers.gameId}`

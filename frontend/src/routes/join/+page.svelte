@@ -8,7 +8,7 @@
 
   let rooms = $state<gameRoom[]>([]);
   let player = $state("");
-  let roomId = $state($gameStore.roomId);
+  let roomId = $state("");
   let isLoading = $state(false);
 
   async function fetchRooms() {

@@ -24,9 +24,9 @@
             }
             gameStore.update((curr) => ({...curr, gameStatus: "finished"}));
         });
-        if () {
-            socketService.play($gameStore.roomId);
-        }
+
+        socketService.play($gameStore.roomId);
+
 
     });
 
