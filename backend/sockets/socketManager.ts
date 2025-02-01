@@ -11,12 +11,19 @@ export const registerSocketEvents = (io: Server): void => {
             console.log(
                 `Player ${req.playerName} attempting to join room ${req.roomId}`
             );
-            const wsPlayerList = socketList.get(req.roomId)
+            const wsPlayerList = socketList.get(req.roomId);
             if (wsPlayerList) {
-                wsPlayerList.push({
-                    playerName: req.playerName,
-                    socketId: socket.id,
-                });
+                const playerIndex = wsPlayerList.findIndex((curr) => curr.playerName === req.playerName);
+
+                if (playerIndex !== -1) {
+                    wsPlayerList[playerIndex].socketId = socket.id;
+                } else {
+
+                    wsPlayerList.push({
+                        playerName: req.playerName,
+                        socketId: socket.id,
+                    });
+                }
             } else {
                 socketList.set(req.roomId, [{
                     playerName: req.playerName,
@@ -29,7 +36,9 @@ export const registerSocketEvents = (io: Server): void => {
             StopGame.map((room) => {
                 if (room.id === req.roomId) {
                     roomFound = true;
-                    room.playersWithAnswers.set(req.playerName, []);
+                    if (!room.playersWithAnswers.get(req.playerName)) {
+                        room.playersWithAnswers.set(req.playerName, []);
+                    }
                     socket.emit("joined-game", room.columns);
                     console.log(`Player ${req.playerName} joined room ${req.roomId}`);
                     console.log(room);
@@ -69,8 +78,8 @@ export const registerSocketEvents = (io: Server): void => {
                 }
             });
             resultPerGameList.map((curr) => {
-                if(curr.gameId === answers.gameId){
-                    curr.playersResults.set(answers.player,curr.playersResults.get(answers.player) || 0 );
+                if (curr.gameId === answers.gameId) {
+                    curr.playersResults.set(answers.player, curr.playersResults.get(answers.player) || 0);
                 }
             })
 
